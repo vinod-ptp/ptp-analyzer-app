@@ -35,7 +35,6 @@ if uploaded_file:
 
     st.subheader("Total Records")
     st.write(len(df))
-     # 👉 ADD BELOW HERE
     st.subheader("Basic Metrics")
 
     total_invoices = len(df)
@@ -49,7 +48,7 @@ if uploaded_file:
     else:
         st.warning("Column 'Payment_Status' not found in data")
         st.subheader("Exception Analysis")
-
+        st.subheader("Exception Analysis")
 if 'Exception_Type' in df.columns:
     exceptions = df['Exception_Type'].value_counts()
     st.bar_chart(exceptions)
