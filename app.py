@@ -2,6 +2,8 @@ import streamlit as st
 import pandas as pd
 
 st.title("PTP Transformation Assistant")
+
+# Sidebar
 st.sidebar.header("Client Questionnaire")
 
 automation_level = st.sidebar.selectbox(
@@ -24,7 +26,9 @@ st.write("Upload your ERP data to begin analysis")
 # File Upload
 uploaded_file = st.file_uploader("Upload ERP File", type=["csv", "xlsx"])
 
+# 🔒 EVERYTHING BELOW INSIDE THIS BLOCK
 if uploaded_file:
+
     if uploaded_file.name.endswith('.csv'):
         df = pd.read_csv(uploaded_file)
     else:
@@ -35,6 +39,10 @@ if uploaded_file:
 
     st.subheader("Total Records")
     st.write(len(df))
+
+    # ---------------------------
+    # BASIC METRICS
+    # ---------------------------
     st.subheader("Basic Metrics")
 
     total_invoices = len(df)
@@ -46,87 +54,85 @@ if uploaded_file:
         st.metric("Total Invoices", total_invoices)
         st.metric("On-Time %", round(on_time_pct, 2))
     else:
-        st.warning("Column 'Payment_Status' not found in data")
-        st.subheader("Exception Analysis")
-        st.subheader("Exception Analysis")
-if 'Exception_Type' in df.columns:
-    exceptions = df['Exception_Type'].value_counts()
-    st.bar_chart(exceptions)
-else:
-    st.warning("Column 'Exception_Type' not found in data")
+        st.warning("Column 'Payment_Status' not found")
+
+    # ---------------------------
+    # EXCEPTION ANALYSIS
+    # ---------------------------
+    st.subheader("Exception Analysis")
+
+    if 'Exception_Type' in df.columns:
+        exceptions = df['Exception_Type'].value_counts()
+        st.bar_chart(exceptions)
+    else:
+        st.warning("Column 'Exception_Type' not found")
+
+    # ---------------------------
+    # DEPARTMENT ANALYSIS
+    # ---------------------------
     st.subheader("Department Analysis")
 
-if 'Department' in df.columns:
-    dept = df['Department'].value_counts()
-    st.bar_chart(dept)
-else:
-    st.warning("Column 'Department' not found in data")
+    if 'Department' in df.columns:
+        dept = df['Department'].value_counts()
+        st.bar_chart(dept)
+    else:
+        st.warning("Column 'Department' not found")
+
+    # ---------------------------
+    # INSIGHTS
+    # ---------------------------
     st.subheader("As-Is Process Insights")
 
-insights = []
+    insights = []
 
-# On-time performance insight
-if 'Payment_Status' in df.columns:
-    if on_time_pct < 80:
-        insights.append("⚠️ Low on-time payment performance indicating process inefficiencies")
-    else:
-        insights.append("✅ Good on-time payment performance")
+    if 'Payment_Status' in df.columns:
+        if on_time_pct < 80:
+            insights.append("⚠️ Low on-time payment performance")
+        else:
+            insights.append("✅ Good on-time performance")
 
-# Exception insight
-if 'Exception_Type' in df.columns:
-    top_exception = exceptions.idxmax()
-    insights.append(f"🔍 Most common exception: {top_exception}")
+    if 'Exception_Type' in df.columns:
+        top_exception = exceptions.idxmax()
+        insights.append(f"🔍 Top exception: {top_exception}")
 
-# Department insight
-if 'Department' in df.columns:
-    top_dept = dept.idxmax()
-    insights.append(f"🏢 Most challenging department: {top_dept}")
+    if 'Department' in df.columns:
+        top_dept = dept.idxmax()
+        insights.append(f"🏢 Problem department: {top_dept}")
 
-# Display insights
-for i in insights:
-    st.write(i)
+    for i in insights:
+        st.write(i)
+
+    # ---------------------------
+    # AS-IS PROCESS
+    # ---------------------------
     st.subheader("As-Is Process Flow")
 
-process_steps = []
+    process_steps = [
+        "1. Invoice received from vendor",
+        "2. Invoice validation and exception check",
+        "3. Routed to department for approval",
+        "4. Payment processed",
+        "5. Manual exception handling",
+        "6. Approval delays impact payment"
+    ]
 
-process_steps.append("1. Invoice received from vendor")
+    for step in process_steps:
+        st.write(step)
 
-if 'Exception_Type' in df.columns:
-    process_steps.append("2. Invoice validation and exception check")
+    # ---------------------------
+    # TO-BE PROCESS
+    # ---------------------------
+    st.subheader("To-Be Process (Recommended)")
 
-if 'Department' in df.columns:
-    process_steps.append("3. Invoice routed to respective department for approval")
+    tobe_steps = [
+        "1. Digital invoice intake",
+        "2. Automated validation",
+        "3. Auto exception handling",
+        "4. Workflow-based approval",
+        "5. Real-time tracking",
+        "6. Automated payment",
+        "7. KPI dashboard"
+    ]
 
-if 'Payment_Status' in df.columns:
-    process_steps.append("4. Payment processing based on approval and due date")
-
-# Add pain points based on insights
-process_steps.append("5. Exceptions handled manually causing delays")
-process_steps.append("6. Approval delays impacting on-time payment performance")
-
-# Display process
-for step in process_steps:
-    st.write(step)
-    st.subheader("Initial To-Be Process (Recommended)")
-
-tobe_steps = []
-
-tobe_steps.append("1. Invoice received digitally (e-invoice / OCR)")
-tobe_steps.append("2. Automated validation and duplicate check")
-
-if 'Exception_Type' in df.columns:
-    tobe_steps.append("3. Exceptions auto-classified and routed")
-
-if 'Department' in df.columns:
-    tobe_steps.append("4. Automated workflow-based approval")
-
-tobe_steps.append("5. Real-time tracking of invoice status")
-tobe_steps.append("6. Automated payment processing")
-tobe_steps.append("7. Dashboard for monitoring KPIs")
-
-# Add improvement note
-tobe_steps.append("➡️ Reduced manual intervention and improved cycle time")
-
-# Display To-Be process
-for step in tobe_steps:
-    st.write(step)
+    for step in tobe_steps:
+        st.write(step)
